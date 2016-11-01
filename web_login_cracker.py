@@ -30,12 +30,12 @@ def web_login(username, password, cookie, code_url, use_https=False):
             with open('log.temp', 'rb') as log_file:
                 log_temp = log_file.read()
                 if re.search(r"\{%u%\}.*\{%p%\}.*", log_temp):
-                    log_temp = re.sub(r"\{%u%\}.*\{%p%\}.*", "{%%u%%}%s{%%p%%}%s" % (username, password), log_temp)
+                    log_temp = re.sub(r"\{%u%\}.*\{%p%\}.*", "{{%u%}}{0!s}{{%p%}}{1!s}".format(username, password), log_temp)
                     with open('log.temp', 'wb') as log_file:
                         log_file.write(log_temp)
                 else:
                     with open('log.temp', 'ab') as log_file:
-                        log_file.write("{%%u%%}%s{%%p%%}%s" % (username, password))
+                        log_file.write("{{%u%}}{0!s}{{%p%}}{1!s}".format(username, password))
         except IOError, e:
             print e
             print "[!]Write the log file fails,you may not be able to use -R!"
@@ -225,7 +225,7 @@ def main():
                 continue
             else:
                 c2 = True
-            print "[+]Test username:%s password:%s" % (user, pwd)
+            print "[+]Test username:{0!s} password:{1!s}".format(user, pwd)
             if cookie_url is not None:
                 cookie = getcookie(cookie_url)
             else:
@@ -233,25 +233,25 @@ def main():
             status = web_login(user, pwd, cookie, code_url, https)
             if status[0] == 2:
                 for i in range(5):
-                    print "[!]Wrong verification code!retry again.(%d/5)" % (i+1)
+                    print "[!]Wrong verification code!retry again.({0:d}/5)".format((i+1))
                     status = web_login(user, pwd, cookie, code_url, https)
                     if status[0] != 2:
                         break
                     elif status[0] == 2 and i == 4:
                         raise RuntimeError("[!]Verification code tool recognition error occurred！")
             if status[0] == 0:
-                print "[-]Fail:%s" % status[1]
+                print "[-]Fail:{0!s}".format(status[1])
             elif status[0] == 1:
-                print "[-]Fail:%s" % status[1]
+                print "[-]Fail:{0!s}".format(status[1])
                 break
             else:
                 success = True
                 success_result.append([user, pwd])
-                print "[+]Success?:\n%s" % status[1]
+                print "[+]Success?:\n{0!s}".format(status[1])
                 try:
                     with open('success.txt', 'wb') as success_file:
                         success_file.write(status[2])
-                        print "[+]Write success file %s done!" % (os.getcwd() + "\success.txt")
+                        print "[+]Write success file {0!s} done!".format((os.getcwd() + "\success.txt"))
                         while True:
                             continue_test = raw_input("[?]Do you want to continue to test other users?(Y/N):")
                             if continue_test == 'Y' or continue_test == 'y':
@@ -278,7 +278,7 @@ def main():
         print "[+]Success!"
         i = 1
         for result in success_result:
-            print "[%i]Username:%sPassword:%s" % (i, result[0], result[1])
+            print "[{0:d}]Username:{1!s}Password:{2!s}".format(i, result[0], result[1])
             i += 1
     else:
         print "[-]Can't find a user and password!"
